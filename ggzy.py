@@ -32,6 +32,9 @@ def send_email(text):
 Regx = re.compile("(([1-9]\\d*[\\d,，]*\\.?\\d*)|(0\\.[0-9]+))(元|百万|万元|亿元|万|亿)")
 
 def filter_money(html):
+	'''
+	todo...
+	'''
 	result = Regx.search(html)
 	money_list = []
 	if result != None:
@@ -64,13 +67,14 @@ def now_time():
 	
 def process():
 	localtime = time.localtime(time.time())
-	date = '%s-%s-%s'%(localtime.tm_year, localtime.tm_mon, localtime.tm_mday)
+	begin_date = '%s-%s-01'%(localtime.tm_year, localtime.tm_mon)
+	end_date = '%s-%s-%s'%(localtime.tm_year, localtime.tm_mon, localtime.tm_mday)
 	
 	data = {
-		'TIMEBEGIN_SHOW': date,
-		'TIMEEND_SHOW': date,
-		'TIMEBEGIN': date,
-		'TIMEEND': date,
+		'TIMEBEGIN_SHOW': begin_date,
+		'TIMEEND_SHOW': end_date,
+		'TIMEBEGIN': begin_date,
+		'TIMEEND': end_date,
 		'SOURCE_TYPE': '1',
 		'DEAL_TIME': '02',
 		'DEAL_CLASSIFY': '00',
@@ -92,8 +96,6 @@ def process():
 	result = json.loads(result)
 	data = result['data']
 	for info in data:
-		print(info['title'])
-		continue
 		deal_page(info['title'], info['url'])
 
 if __name__ == '__main__':
