@@ -8,6 +8,7 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+from src.conf import Conf
 
 def send_email(text):
 	fromaddr = 'monitor@ownthink.com'
@@ -30,7 +31,6 @@ def send_email(text):
 
 
 Regx = re.compile("(([1-9]\\d*[\\d,，]*\\.?\\d*)|(0\\.[0-9]+))(元|百万|万元|亿元|万|亿)")
-
 def filter_money(html):
 	'''
 	todo...
@@ -41,24 +41,76 @@ def filter_money(html):
 		money_list.append(result.group())
 	return money_list
 		
+def filter_html(text):
+	biao = re.findall('<.*?>', text)
+	for b in biao:
+		text = text.replace(b, '')
+	text = text.replace('&nbsp;', '').replace('）', '')
+	return text
+
+	
 def deal_page(title, url):
 	url_head = 'http://www.ggzy.gov.cn/information'
+	
+	# url = 'http://www.ggzy.gov.cn/information/html/a/440000/0201/201903/15/0044aa96457d9cc44ef6894964dab52f5272.shtml'
+	#print(url)
+	url = url.replace('/html/a/', '/html/b/')
+	print(url)
+	
 	sess = requests.get(url)
 	html = sess.text
-	detail_url = re.findall('''onclick="showDetail\(this, '.*?','(.*?)'\)">''', html)
-	for detail in detail_url:
-		url = url_head + detail
-		sess = requests.get(url)
-		html = sess.text
-		result = filter_money(html)
-		if result != []:
-			text = 'title:%s \nurl:%s \nmoney:%s \n'%(title, '手工根据title检索url', ' '.join(result))
+	
+	project_num = re.findall('项目编号：[\s\S]*?</p>', html)
+	if project_num:
+		project_num = filter_html(project_num[0])
+	else:
+		project_num = ''
+	
+	html = filter_html(html)
+	result = filter_money(html)
+	
+	mast_send_email = False
+	for res in result:
+		if res.find('亿') >= 0:
+			mast_send_email = True
+			break
+		elif res.find('万元')>=0:
+			if len(res.replace('万元', ''))>3:
+				mast_send_email = True
+				break
+		elif res.find('元')>=0:
+			if len(res.replace('.00元', '').replace('元', ''))>7:
+				mast_send_email = True
+				break
+		
+				
+		print(res)
+	#print(project_num)
+	if mast_send_email:
+		text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n'%(title, '手工根据title检索url', ' '.join(result), project_num)
+		print(text)
+		
+		#send_email(text)
+	else:
+		# print('不发送')
+		pass
+	
+	# detail_url = re.findall('''onclick="showDetail\(this, '.*?','(.*?)'\)">''', html)
+	# for detail in detail_url:
+		# url = url_head + detail
+		# sess = requests.get(url)
+		# html = sess.text
+		# result = filter_money(html)
+		# if result != []:
+			# print(result)
+		
+		
+			# text = 'title:%s \nurl:%s \nmoney:%s \n'%(title, '手工根据title检索url', ' '.join(result))
 			
-			print(text)
+			# print(text)
 			
-			send_email(text)
+			#send_email(text)
 			
-			sys.exit(0)
 			
 def now_time():
 	localtime = time.localtime(time.time())
