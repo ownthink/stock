@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-  
 import time
 from datetime import datetime
 import re
@@ -8,12 +10,12 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-from src.conf import Conf
+#from src.conf import Conf
 
 def send_email(text):
 	fromaddr = 'monitor@ownthink.com'
 	password = 'Adeal.ggzy.gov.cn'
-	toaddrs = ['14476239@qq.com', '158760520@qq.com']
+	toaddrs = ['denghaiai@ownthink.com', 'yener@ownthink.com']
 	 
 	message = MIMEText(text, 'plain','utf-8')  
 	message['Subject'] = Header('投标交易公告', 'utf-8')
@@ -90,7 +92,9 @@ def deal_page(title, url):
 		text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n'%(title, '手工根据title检索url', ' '.join(result), project_num)
 		print(text)
 		
-		#send_email(text)
+		send_email(text)
+		
+		sys.exit(0)
 	else:
 		# print('不发送')
 		pass
