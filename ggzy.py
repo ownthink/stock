@@ -92,7 +92,7 @@ def deal_page(title, url):
 		text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n'%(title, '手工根据title检索url', ' '.join(result), project_num)
 		print(text)
 		
-		send_email(text)
+		sendmessage(text)
 		
 		sys.exit(0)
 	else:
@@ -114,6 +114,27 @@ def deal_page(title, url):
 			# print(text)
 			
 			#send_email(text)
+def sendmessage(message):
+
+    url ='https://oapi.dingtalk.com/robot/send?access_token=db64d570dd4d34c29488b0d2f205fe82081614d89c69a0d7c3a3adf32ba1a92e'
+    HEADERS = {
+        "Content-Type": "application/json ;charset=utf-8 "
+    }
+    message = message
+    String_textMsg = {
+        "msgtype": "text",
+        "text": {"content": message},
+         "at": {
+            "atMobiles": [
+                "130xxxxxxxx"                                    #如果需要@某人，这里写他的手机号
+            ],
+            "isAtAll": 1                                         #如果需要@所有人，这些写1
+        }
+    }
+    String_textMsg = json.dumps(String_textMsg)
+
+    res = requests.post(url, data=String_textMsg, headers=HEADERS)
+    print(res.text)
 			
 			
 def now_time():
