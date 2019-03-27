@@ -71,7 +71,8 @@ def deal_page(title, url):
 	html = filter_html(html)
 	result = filter_money(html)
 	
-	mast_send_email = False
+	mast_send_email = contentsStr(html)
+        print('ttttttttttttt')
 	for res in result:
 		if res.find('亿') >= 0:
 			mast_send_email = True
@@ -89,12 +90,12 @@ def deal_page(title, url):
 		print(res)
 	#print(project_num)
 	if mast_send_email:
-		text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n'%(title, '手工根据title检索url', ' '.join(result), project_num)
+		text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n'%(title, url, ' '.join(result), project_num)
 		print(text)
 		
-		sendmessage(text)
+		#sendmessage(text)
 		
-		sys.exit(0)
+		#sys.exit(0)
 	else:
 		# print('不发送')
 		pass
@@ -135,7 +136,15 @@ def sendmessage(message):
 
     res = requests.post(url, data=String_textMsg, headers=HEADERS)
     print(res.text)
-			
+
+def contentsStr(html):
+
+     list = ['贵州省德江']
+     for str in list:
+          print(html.find(str))
+          if( html.find(str) > -1) :
+              return True
+     return False			
 			
 def now_time():
 	localtime = time.localtime(time.time())
