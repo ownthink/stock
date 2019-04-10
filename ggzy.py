@@ -74,24 +74,27 @@ def deal_page(title, url):
     html = filter_html(html)
     result = filter_money(html)
 
-    mast_send_email = contentsStr(html)
+    str_contens_ok = not_contents(html)
+
+    money_ok = False
     print('ttttttttttttt')
     for res in result:
+
         if res.find('亿') >= 0:
-            mast_send_email = True
+            money_ok = True
             break
         elif res.find('万元') >= 0:
-            if len(res.replace('万元', '')) > 6:
-                mast_send_email = True
+            if len(res.replace('万元', '').replace(',', '').split('.')[0]) > 4:
+                money_ok = True
                 break
         elif res.find('元') >= 0:
-            if len(res.replace('.00元', '').replace('元', '')) > 8:
-                mast_send_email = True
+            if len(res.replace('元', '').replace(',', '').split('.')[0]) > 8:
+                money_ok = True
                 break
 
-        print(res)
-    # print(project_num)
-    if mast_send_email:
+
+
+    if str_contens_ok and money_ok:
         text = 'title:%s \nurl:%s \nmoney:%s \nnum:%s\n' % (title, url, ' '.join(result), project_num)
         print(text)
 
@@ -104,7 +107,8 @@ def deal_page(title, url):
 
 
 def sendmessage(message):
-    url = 'https://oapi.dingtalk.com/robot/send?access_token=db64d570dd4d34c29488b0d2f205fe82081614d89c69a0d7c3a3adf32ba1a92e'
+
+    url ='https://oapi.dingtalk.com/robot/send?access_token=db64d570dd4d34c29488b0d2f205fe82081614d89c69a0d7c3a3adf32ba1a92e'
     HEADERS = {
         "Content-Type": "application/json ;charset=utf-8 "
     }
@@ -112,11 +116,11 @@ def sendmessage(message):
     String_textMsg = {
         "msgtype": "text",
         "text": {"content": message},
-        "at": {
+         "at": {
             "atMobiles": [
-                "130xxxxxxxx"  # 如果需要@某人，这里写他的手机号
+                "130xxxxxxxx"                                    #如果需要@某人，这里写他的手机号
             ],
-            "isAtAll": 1  # 如果需要@所有人，这些写1
+            "isAtAll": 1                                         #如果需要@所有人，这些写1
         }
     }
     String_textMsg = json.dumps(String_textMsg)
@@ -125,7 +129,24 @@ def sendmessage(message):
     print(res.text)
 
 
+def not_contents(html):
+    if contentsStr(html):
+        return True
+
+    notList = ['勘探', '勘察', '市政工程', '建设用地', '建筑工程', '土地用途']
+
+    for str in notList:
+        print(html.find(str))
+        if (html.find(str) > -1):
+            return False
+
+    return True
+
+
+
 def contentsStr(html):
+
+
     list = ['贵州省德江']
     for str in list:
         print(html.find(str))
@@ -147,12 +168,12 @@ def process():
     end_date = '%s-%s-%s' % (localtime.tm_year, localtime.tm_mon, localtime.tm_mday)
 
     head_data = {
-        'TIMEBEGIN_SHOW': end_date,
+        'TIMEBEGIN_SHOW': begin_date,
         'TIMEEND_SHOW': end_date,
-        'TIMEBEGIN': end_date,
+        'TIMEBEGIN': begin_date,
         'TIMEEND': end_date,
         'SOURCE_TYPE': '1',
-        'DEAL_TIME': '01',
+        'DEAL_TIME': '02',
         'DEAL_CLASSIFY': '00',
         'DEAL_STAGE': '0000',
         'DEAL_PROVINCE': '0',
